@@ -1,0 +1,153 @@
+<1>
+Python中的一切(是的，甚至是类)都是对象。 我们定义的名称只是绑定到这些对象的标识符。 
+函数也不例外，它们也是对象(带有属性)。 各种不同的名称可以绑定到同一个功能对象。
+
+示例
+def first(msg):
+    print(msg)    
+
+first("Hello")
+
+second = first
+second("Hello")
+
+输出结果 Hello
+         Hello
+
+当运行代码时，first和second函数都提供相同的输出。 这里名称first和second引用相同的函数对象。
+
+函数可以作为参数传递给另一个函数
+
+<2>
+2.1 手动实现一个装饰器
+代码
+def make_pretty(func):
+    def inner():
+        print("I got decorated")
+        func()
+    return inner
+
+def ordinary():
+    print("I am ordinary")
+	
+(1)执行操作  ordinary()  执行结果  I am ordinary
+
+(2)执行操作
+ordinary = make_pretty(ordinary)
+ordinary() 
+执行结果 
+I got decorated
+I am ordinary
+
+因此，在最基本的意义上，装饰器是可调用的，并且可以返回可调用
+
+通常把这一步
+def ordinary():
+    print("I am ordinary")
+ordinary = make_pretty(ordinary)
+
+简写成装饰器的形式
+@make_pretty
+def ordinary():
+    print("I am ordinary")
+	
+2.2 带参数的装饰器
+def divide(a, b):
+    return a/b
+
+这是除法函数，如果b=0的话就会报错
+现在我们来使用一个装饰器来检查这个错误
+def smart_divide(func):
+    def inner(a,b):
+	    if b==0:
+		    print("oh ,cant be divided")
+		    return
+	    return func(a,b)
+	return inner
+	
+@smart_divide
+def divide(a,b):
+    return a/b
+
+如果发生错误，这个新的实现将返回None
+
+我们注意到，装饰器中嵌套的inner()函数的参数与其装饰的函数的参数是一样的
+
+2.3一般装饰器
+
+在Python中，一般装饰器由function(* args，** kwargs)完成。 这样，args将是位置参数的元组，kwargs将是关键字参数的字典
+
+这样的装饰器的例子将是
+def works_for_all(func):
+    def inner(*args, **kwargs):
+        print("I can decorate any function")
+        return func(*args, **kwargs)
+    return inner
+
+实例
+
+def before_eat(func):
+    def inner(*args,**kwargs):
+        anwser=raw_input("have you wash your hand? yes?")
+        if anwser=="yes":
+            print("I am geting to eat")
+        else:
+            print("please wash your hand first")
+            return
+        return func(*args,**kwargs)
+    return inner
+
+@before_eat
+def eat():
+    print("so delicious")
+eat()
+
+2.4多个装饰器链接
+
+def star(func):
+    def inner(*args, **kwargs):
+        print("*" * 30)
+        func(*args, **kwargs)
+        print("*" * 30)
+    return inner
+
+def percent(func):
+    def inner(*args, **kwargs):
+        print("%" * 30)
+        func(*args, **kwargs)
+        print("%" * 30)
+    return inner
+
+@star
+@percent
+def printer(msg):
+    print(msg)
+printer("Hello")
+
+相当于
+def printer(msg):
+    print(msg)
+printer = star(percent(printer))
+
+结果
+******************************
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Hello
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+******************************
+
+@percent
+@star
+def printer(msg):
+    print(msg)
+printer("Hello")
+
+结果
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+******************************
+Hello
+******************************
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+结论：装饰器的顺序是重要的。 所以如果把顺序颠倒了执行结果就不一样了
+
