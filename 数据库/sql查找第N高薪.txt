@@ -1,0 +1,37 @@
+编写一个 SQL 查询，获取 Employee 表中第 n 高的薪水（Salary）。
+
++----+--------+
+| Id | Salary |
++----+--------+
+| 1  | 100    |
+| 2  | 200    |
+| 3  | 300    |
++----+--------+
+例如上述 Employee 表，n = 2 时，应返回第二高的薪水 200。如果不存在第 n 高的薪水，那么查询应返回 null。
+
++------------------------+
+| getNthHighestSalary(2) |
++------------------------+
+| 200                    |
++------------------------+
+
+分析：需要用sql的自定义函数去查找
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+#CREATE FUNCTION +function-name(需要传入的值，值的类型) returns此处必须要有返回值 int返回值类型
+BEGIN
+#开始的标志
+
+Declare M INT; 
+#函数中申明变量，需要注明类型
+Set M = N-1;
+#用set为变量赋值
+
+  RETURN (
+      
+      SELECT DISTINCT Salary FROM Employee ORDER BY Salary DESC LIMIT M,1
+      # Write your MySQL query statement below.
+#函数，返回值需要使用return，M,1-->返回偏移量为M的一个数值
+      
+  );
+END
